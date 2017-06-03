@@ -5,7 +5,7 @@ from cleanData import dataCleanUp
 from grouping import grouping
 
 
-file_name = input('Please enter file name or press enter to continue')
+file_name = input('Please enter file name or press enter to continue:\n')
 cr = None
 GroupName = ['Section', 'Study Group']
 NumofGroup = [3, 15]
@@ -24,5 +24,6 @@ for i in range(len(GroupName)):
         indexG = GroupName[i-1]
 
     df = grouping(df,NumofGroup[i],indexG,GroupName[i], cr)
-    
-df.to_csv('output.csv')
+
+df = df.sort_values(by = GroupName)    
+df.to_csv('output.csv', index = False)
