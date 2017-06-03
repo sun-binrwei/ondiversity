@@ -1,0 +1,100 @@
+---
+title: "R Notebook"
+output: md_notebook
+---
+## Preparation
+loading tools
+```{r}
+library(ggplot2)
+library(gridExtra)
+source("functions.R")
+```
+
+(run `Categorixation2.Rmd` to get sorted_data)
+
+```{r}
+# check what's in there
+names(data)
+out_data <- data
+
+```
+
+
+```{r}
+p <-ggplot(data, aes(Primary.Nat,fill = Gender))
+p <- p +geom_bar(stat = "count") 
+p <- p + facet_grid(Section ~ .)
+p <- p + scale_fill_brewer(palette="Set1")
+p <- p + theme(axis.text.x = element_text(angle = 60, hjust = 1))
+p
+```
+
+```{r}
+df <- data.frame(section = rep(NA, ng+1), 
+                 IER_Nat = rep(NA, ng+1), 
+                 Richness_Nat = rep(NA, ng+1), 
+                 IER_Gender = rep(NA, ng +1),
+                 Richness_Gender = rep(NA, ng +1),
+                 IER_Job = rep(NA, ng +1),
+                 Richness_Job = rep(NA, ng +1),
+                 scale = rep(NA, ng +1))
+
+# alpha diversity of each group
+for (g in 1:ng){
+    df$section[g] <- g
+    df$scale[g] <- 'Section'
+    # Primary Nationality in this group
+    subdata <- out_data$Primary.Nat[out_data$section == g]
+    # mean encounter rate
+    df$IER_Nat[g] <- simpsonIER(subdata)
+    df$Richness_Nat[g] <- richness(subdata)
+    # Gender in this group
+    subdata <- out_data$Gender[out_data$section == g]
+    # mean encounter rate
+    df$IER_Gender[g] <- simpsonIER(subdata)
+    df$Richness_Gender[g] <- richness(subdata)
+    # Job in this group
+    subdata <- out_data$Last.Job.Domain.Description[out_data$section == g]
+    # mean encounter rate
+    df$IER_Job[g] <- simpsonIER(subdata)
+    df$Richness_Job[g] <- richness(subdata)
+}
+
+# "gamma" diveristy: 
+df$section[ng + 1] <- 'ALL'
+df$IER_Nat[ng + 1] <- simpsonIER(out_data$Primary.Nat)
+df$Richness_Nat[ng + 1] <- richness(out_data$Primary.Nat)
+df$IER_Gender[ng + 1] <- simpsonIER(out_data$Gender)
+df$Richness_Gender[ng + 1] <- richness(out_data$Gender)
+df$IER_Job[ng + 1] <- simpsonIER(out_data$Last.Job.Domain.Description)
+df$Richness_Job[ng + 1] <- richness(out_data$Last.Job.Domain.Description)
+df$scale[ng +1] <- 'Class'
+
+# format "section" as factor
+#df$section <- as.factor(df$section)
+df
+```
+
+```{r}
+p1 <- ggplot(df, aes(x = section, y = IER_Nat, fill = scale))
+p1 <- p1 + geom_bar(stat = "identity")
+
+r1 <- ggplot(df, aes(x = section, y = Richness_Nat, fill = scale))
+r1 <- r1 + geom_bar(stat = "identity")
+
+p2 <- ggplot(df, aes(x = section, y = IER_Gender, fill = scale))
+
+p2 <- p2 + geom_bar(stat = "identity")
+
+r2 <- ggplot(df, aes(x = section, y = Richness_Gender, fill = scale))
+r2 <- r2 + geom_bar(stat = "identity")
+
+p3 <- ggplot(df, aes(x = section, y = IER_Job, fill = scale))
+p3 <- p3 + geom_bar(stat = "identity")
+
+r3 <- ggplot(df, aes(x = section, y = Richness_Job, fill = scale))
+r3 <- r3 + geom_bar(stat = "identity")
+
+grid.arrange(p1, r1, p2, r2,p3,r3,  ncol=2)
+```
+

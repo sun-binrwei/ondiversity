@@ -1,0 +1,48 @@
+---
+title: "R Notebook"
+output: md_notebook
+---
+
+
+```{r}
+rm(list = ls())
+```
+
+# Input data from csv file
+
+```{r}
+
+data <- read.csv("https://raw.githubusercontent.com/weitingwlin/ondiversity/master/Data/mock_data.csv")
+names(data)
+#names(data)[1] <- 'EmplID'
+```
+
+#Data cleaning (Delete all data entry with EmplID = N/A)
+```{r}
+ind <- !is.na(data$EmplID)
+data2 <- data[ind,]
+```
+
+
+#Sort the data with "Primary Nationality" then "Gender" then "Background"
+```{r}
+sorted_data <- data2[with(data2, order( Primary.Nat,Gender, Last.Job.Domain.Description)),]
+dimension = dim(sorted_data)
+length = dimension[1]
+```
+
+#Add Section ID to each entry with repeat order
+```{r}
+ng <- 15 # number of group
+section <- rep(1:ng, length.out = length)
+section <-  as.factor(section)
+out_data <- cbind(section, sorted_data)
+```
+
+#Sort the data with section
+```{r}
+# out_data <- out_data[with(sorted_data, order(section)),]
+```
+
+
+
