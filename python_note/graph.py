@@ -8,9 +8,10 @@ Created on Sat Jun  3 23:50:52 2017
 
 import pandas as pd
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-
-def graph(df = pd.read_csv('output.csv'), cr, groupName):
+def calc(df, cr, groupName):
     
    '''
    df is a dataframe
@@ -19,51 +20,105 @@ def graph(df = pd.read_csv('output.csv'), cr, groupName):
    the first element is main group, the second is subgroup
    '''
    
-   #Get unique numbers of the main group
-   maingroup = df[groupName[0]].unique()
    
-   #Get unique numbers of the subgroup
+   maingroup = df[groupName[0]].unique()
+       
+    #Get unique numbers of the subgroup
    if len(groupName) > 1:
        subgroup = df[groupName[1]].unique()
    else:
        subgroup = None
        subResult = None
-       
+    
    #Calcualte the Richness of each main group and subgroup
-   mainResult = pd.DataFrame(columns = [groupName[0], 'cr', 'richness', 'IER'])
-   subResult = pd.DataFrame(columns = [groupName[0], groupName[1],'cr', 'richness', 'IER'])
+   #Build empty dataFrame for each main group and subgroup calculation
+   calculations = ['Richness', 'IER']
+   mainResult = pd.DataFrame(columns = [groupName[0], 'cr', 
+                                        calculations[0], calculations[1]])
+   subResult = pd.DataFrame(columns = [groupName[0], groupName[1],'cr', 
+                                       calculations[0], calculations[1]])
+    
+   #Iterate through criteria
+   for c in cr:
+       #Iterate through maingroup
+        for i in maingroup:
+            r = richness(df[df[groupName[0]] == i], c)
+            IER = simpsonIER(df[df[groupName[0]] == i], c)
+            index = len(mainResult)
+            mainResult.set_value(index,groupName[0], i)
+            mainResult.set_value(index,'cr', c)
+            mainResult.set_value(index, calculations[0], r)
+            mainResult.set_value(index, calculations[1], IER)
+            if subgroup != None:
+                #Iterate through subgroup
+                for s in subgroup:
+                    tempdf = df[(df[groupName[0]]==i) & (df[groupName[1]]==s)]
+                    r = richness(tempdf, c)
+                    IER = simpsonIER(tempdf, c)
+                    index = len(subResult)
+                    subResult.set_value(index,groupName[0], i)
+                    subResult.set_value(index,groupName[1], s)
+                    subResult.set_value(index,'cr', c)
+                    subResult.set_value(index, calculations[0], r)
+                    subResult.set_value(index, calculations[1], IER)
+                index = len(subResult)
+                r = richness(df[df[groupName[0]] == i], c)
+                IER = simpsonIER(df[df[groupName[0]]==i],c)
+                subResult.set_value(index,groupName[0], i)
+                subResult.set_value(index,groupName[1], 'ALL')
+                subResult.set_value(index, 'cr',c)
+                subResult.set_value(index, calculations[0], r)
+                subResult.set_value(index, calculations[1], IER)
+                
+        r = richness(df, c)
+        IER = simpsonIER(df, c)
+        index = len(mainResult)
+        mainResult.set_value(index, groupName[0], 'ALL')
+        mainResult.set_value(index, 'cr', c)
+        mainResult.set_value(index, calculations[0], r)
+        mainResult.set_value(index, calculations[1], IER)
+        
+   return mainResult, subResult
+       
 
-   for i in maingroup:
+                
+
+def chart(df, cr, groupName, filename):
+    
+    calculations = ['Richness','IER']
+    #set up the plot style
+    sns.set_style("darkgrid")
+    plt.style.use(plt.style.available[1])
+    fig, axes = plt.subplots(len(cr), 2, figsize = (10,8))
+   
+    #Set ylim to 'IER' result
+    lim = lambda x:  (0,1) if x == 1 else None
+    #Set title to the first chart in the every column
+    ti = lambda x, y: y if x == 0 else None
+   
+    #Build the subplots
+    for i, com in enumerate(calculations):
+        for k, c, ax in zip([0,1,2], cr, axes):
+            
+            ax[i].set_ylabel(c)
+            
+            df[df['cr'] == c].plot(x=groupName, y = com, 
+              legend = False, kind = 'bar', 
+              ax= ax[i], sharex = cr[i], 
+              ylim = lim(i),title = ti(k, com))
+            
+            plt.setp( ax[i].xaxis.get_majorticklabels(), rotation=0 )
+            
+            plt.subplots_adjust(hspace = 0.1)        
+   
+     #Output the plot
+    fig
+    plt.savefig(filename, bbox_inches='tight')
        
-       for c in cr:
-           r = richness(df[groupName[0] == i], c)
-           IER = simpsonIER(df[groupName[0] == i], c)
-           index = len(mainResult)
-           mainResult.set_value(index,groupName[0], i)
-           mainResult.set_value(index,'cr', c)
-           mainResult.set_value(index,'richness', r)
-           mainResult.set_value(index,'IER', IER)
-           if subgroup != None:
-               for s in subgroup:
-                   r = richness(df[groupName[1] == s], c)
-                   IER = simpsonIER(df[groupName[1] == s], c)
-                   index = len(subResult)
-                   subResult.set_value(index,groupName[0], i)
-                   subResult.set_value(index,groupName[1], s)
-                   subResult.set_value(index,'cr', c)
-                   subResult.set_value(index,'richness', r)
-                   subResult.set_value(index,'IER', IER)
-       
-                   
-    
-    #Plot result for maingroup
-    
-    
-    
-    
-    
-    #Plot result for subgroup
-           
+
+        
+        
+        
        
        
     
