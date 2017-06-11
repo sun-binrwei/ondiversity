@@ -16,7 +16,7 @@ McKinsey Insight - [Why diversity matters](http://www.mckinsey.com/business-func
 
 ### Probability of Interspecific Encounter (Simpson’s Evenness)
 
-### Entropy (Shannon diversity index)
 
-## "Shiny" app
-[A demo web app](https://weitingwlin.shinyapps.io/shinydemo/){:target="_blank"} 
+
+## Web based application
+[A demo web app](http://ec2-54-65-147-28.ap-northeast-1.compute.amazonaws.com:8000/){:target="_blank"} 
