@@ -19,4 +19,4 @@ McKinsey Insight - [Why diversity matters](http://www.mckinsey.com/business-func
 
 
 ## Web based application
-[A demo web app](http://ec2-54-65-147-28.ap-northeast-1.compute.amazonaws.com:8000/){:target="_blank"} 
+[A demo web app](http://ec2-54-65-147-28.ap-northeast-1.compute.amazonaws.com:8000/)
